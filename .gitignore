@@ -1,0 +1,18 @@
+# Build output
+build/
+out/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+
+# Visual Studio local state
+.vs/
+CMakeSettings.json
+
+# macOS local files
+.DS_Store
+
+# Third-party dependencies are fetched by README/GitHub Actions.
+third_party/imgui/
+third_party/implot/

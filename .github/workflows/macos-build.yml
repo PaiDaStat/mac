@@ -1,0 +1,94 @@
+name: macOS Build
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - "v*"
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86_64
+            runner: macos-15-intel
+          - arch: arm64
+            runner: macos-15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          brew update
+          brew install cmake ninja glfw
+
+      - name: Fetch Dear ImGui
+        run: |
+          mkdir -p third_party
+          git clone --depth 1 https://github.com/ocornut/imgui.git third_party/imgui
+
+      - name: Fetch ImPlot
+        run: |
+          mkdir -p third_party
+          git clone --depth 1 https://github.com/epezent/implot.git third_party/implot
+
+      - name: Configure
+        run: |
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_OSX_ARCHITECTURES=${{ matrix.arch }}
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Adhoc sign app
+        run: codesign --force --deep --sign - build/bin/MacUSBMon.app
+
+      - name: Verify binary architecture
+        run: |
+          file build/bin/MacUSBMon.app/Contents/MacOS/MacUSBMon
+          lipo -info build/bin/MacUSBMon.app/Contents/MacOS/MacUSBMon
+
+      - name: Package app
+        run: |
+          mkdir -p dist
+          ditto -c -k --keepParent build/bin/MacUSBMon.app dist/MacUSBMon-${{ matrix.arch }}.zip
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MacUSBMon-${{ matrix.arch }}
+          path: dist/MacUSBMon-${{ matrix.arch }}.zip
+          if-no-files-found: error
+
+  release:
+    name: Upload GitHub release assets
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.zip
