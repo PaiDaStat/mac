@@ -3,6 +3,8 @@ project(MacUSBMon LANGUAGES C CXX OBJCXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_OBJCXX_STANDARD 17)
+set(CMAKE_OBJCXX_STANDARD_REQUIRED ON)
 set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "Build universal macOS binary")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
@@ -18,6 +20,11 @@ set(IMPLOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/implot)
 
 if(NOT EXISTS "${IMGUI_DIR}/imgui.cpp")
     message(FATAL_ERROR "Dear ImGui not found. Clone it into third_party/imgui.")
+endif()
+
+file(READ "${IMGUI_DIR}/imgui.h" IMGUI_HEADER)
+if(NOT IMGUI_HEADER MATCHES "ImGuiConfigFlags_DockingEnable")
+    message(FATAL_ERROR "Dear ImGui docking branch is required. Clone with: git clone --branch docking https://github.com/ocornut/imgui.git third_party/imgui")
 endif()
 
 if(NOT EXISTS "${IMPLOT_DIR}/implot.cpp")

@@ -36,7 +36,7 @@ jobs:
       - name: Fetch Dear ImGui
         run: |
           mkdir -p third_party
-          git clone --depth 1 https://github.com/ocornut/imgui.git third_party/imgui
+          git clone --depth 1 --branch docking https://github.com/ocornut/imgui.git third_party/imgui
 
       - name: Fetch ImPlot
         run: |

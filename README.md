@@ -13,11 +13,11 @@ brew install cmake ninja glfw
 Fetch UI dependencies:
 
 ```bash
-git clone https://github.com/ocornut/imgui.git third_party/imgui
+git clone --branch docking https://github.com/ocornut/imgui.git third_party/imgui
 git clone https://github.com/epezent/implot.git third_party/implot
 ```
 
-The repository keeps `third_party/` as a destination for those dependencies; the actual upstream source files are not vendored here.
+The repository keeps `third_party/` as a destination for those dependencies; the actual upstream source files are not vendored here. The Dear ImGui `docking` branch is required because the app enables dock spaces.
 
 ## Build
 
